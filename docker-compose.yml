@@ -1,0 +1,56 @@
+# MySQL and phpMyAdmin Docker Compose Configuration
+# This file sets up a development environment with MySQL database and phpMyAdmin
+
+# Docker Compose version (Note: 'version' is now optional in newer Docker versions)
+version: '3'
+
+# Define the services/containers to be run
+services:
+  # Database service
+  db:
+    # Use MySQL 8.0 image from Docker Hub
+    image: mysql:8.0
+    # Custom container name for easier reference
+    container_name: mysql
+    # Always restart the container if it stops
+    restart: always
+    # Set MySQL to use native password authentication (important for compatibility with many clients)
+    command: --default-authentication-plugin=mysql_native_password
+    # Environment variables for MySQL configuration
+    environment:
+      # Root user password
+      MYSQL_ROOT_PASSWORD: password
+      # Create a database named 'wpdb' on startup
+      MYSQL_DATABASE: wpdb
+      # Create a standard user with these credentials
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    # Persistent volume for database data
+    volumes:
+      # Store MySQL data on the host machine to persist between container restarts
+      - ./mysql-data:/var/lib/mysql
+
+  # phpMyAdmin service for database management through web interface
+  phpmyadmin:
+    # Use official phpMyAdmin image
+    image: phpmyadmin/phpmyadmin
+    # Always restart the container if it stops
+    restart: always
+    # Port mapping: host_port:container_port
+    ports:
+      # Access phpMyAdmin at http://localhost:3333
+      - 3333:80
+    # Environment variables for phpMyAdmin configuration
+    environment:
+      # Connect to the MySQL service (using the service name 'db')
+      PMA_HOST: db
+      # Root password for login
+      MYSQL_ROOT_PASSWORD: password
+
+# Usage Instructions:
+# 1. Start the services: docker compose up -d
+# 2. Access phpMyAdmin: http://localhost:3333
+# 3. Login credentials:
+#    - Username: root or user
+#    - Password: password
+# 4. Stop the services: docker compose down
